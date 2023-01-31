@@ -53,6 +53,10 @@ class CycloneDXCommand:
         dry_build_help = ("Apply the --build argument to output the information, "
                           "as it would be done by the install command")
         parser.add_argument("-db", "--dry-build", action=Extender, nargs="?", help=dry_build_help)
+
+        version = ("Set the version of the component")
+        parser.add_argument("-v", "--version", action=OnceArgument, nargs="?", help=version)
+
         build_help = ("Given a build policy, return an ordered list of packages that would be built"
                       " from sources during the install command")
 
@@ -110,10 +114,12 @@ class CycloneDXCommand:
             'components': [],
             'dependencies': [],
         }
+
         for node in deps_graph.nodes:
-            if node.ref is None:
+            if node.path is not None:
                 # top level component
                 bom['metadata']['component']['name'] = os.path.basename(os.path.dirname(node.path))
+                bom['metadata']['component']['version'] = self._arguments.version
                 bom['metadata']['component']['bom-ref'] = bom['metadata']['component']['name'] + '@' + bom['metadata']['component']['version']
                 dependencies = {
                     'ref': bom['metadata']['component']['bom-ref'],
